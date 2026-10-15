@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Web Scraping Dashboard</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
+body{background:#f4f7fb;color:#172033}
+header{background:linear-gradient(135deg,#16213e,#3157d5);color:white;padding:22px 6%;display:flex;justify-content:space-between;align-items:center}
+header h1{font-size:25px}.badge{background:#ffffff22;padding:9px 14px;border-radius:20px}
+.container{width:88%;max-width:1200px;margin:30px auto}
+.hero{background:white;border-radius:18px;padding:30px;box-shadow:0 8px 30px #17203312;margin-bottom:22px}
+.hero h2{font-size:30px;margin-bottom:10px}.hero p{color:#667085;line-height:1.6}
+.controls{display:flex;gap:12px;margin-top:20px;flex-wrap:wrap}
+input{flex:1;min-width:240px;padding:13px 15px;border:1px solid #d6dbe5;border-radius:10px}
+button{border:0;border-radius:10px;padding:13px 20px;background:#3157d5;color:white;cursor:pointer;font-weight:bold}
+button:hover{background:#2446b6}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:22px}
+.card{background:white;padding:22px;border-radius:15px;box-shadow:0 5px 20px #17203310}
+.card small{color:#667085}.card h3{font-size:28px;margin-top:8px}
+.table-box{background:white;border-radius:18px;padding:24px;box-shadow:0 8px 30px #17203312;overflow:auto}
+table{width:100%;border-collapse:collapse;margin-top:15px}
+th,td{text-align:left;padding:14px;border-bottom:1px solid #edf0f5}
+th{background:#f8f9fc}
+.rating{font-weight:bold}
+.status{color:#15803d;background:#dcfce7;padding:5px 9px;border-radius:20px;font-size:13px}
+footer{text-align:center;color:#667085;padding:30px}
+@media(max-width:700px){.stats{grid-template-columns:1fr}header{gap:10px;flex-direction:column;align-items:flex-start}.container{width:94%}}
+</style>
+</head>
+<body>
+<header>
+  <h1>🌐 Web Scraping Dashboard</h1>
+  <span class="badge">Python • BeautifulSoup</span>
+</header>
+
+<div class="container">
+<section class="hero">
+  <h2>Book Data Scraper</h2>
+  <p>Public book data ko collect, search aur analyze karne ke liye simple web-scraping dashboard.</p>
+  <div class="controls">
+    <input id="search" type="text" placeholder="Search book name...">
+    <button onclick="filterBooks()">Search</button>
+    <button onclick="downloadCSV()">Download CSV</button>
+  </div>
+</section>
+
+<section class="stats">
+  <div class="card"><small>Total Books</small><h3 id="total">0</h3></div>
+  <div class="card"><small>Average Price</small><h3 id="avg">£0</h3></div>
+  <div class="card"><small>Available</small><h3 id="available">0</h3></div>
+</section>
+
+<section class="table-box">
+  <h2>Scraped Dataset</h2>
+  <table>
+    <thead><tr><th>Book Name</th><th>Price</th><th>Rating</th><th>Status</th></tr></thead>
+    <tbody id="bookTable"></tbody>
+  </table>
+</section>
+</div>
+
+<footer>Web Scraping and Data Collection Using Python | College Project</footer>
+
+<script>
+const books=[
+ {name:"A Light in the Attic",price:51.77,rating:"3 Stars",status:"In stock"},
+ {name:"Tipping the Velvet",price:53.74,rating:"1 Star",status:"In stock"},
+ {name:"Soumission",price:50.10,rating:"1 Star",status:"In stock"},
+ {name:"Sharp Objects",price:47.82,rating:"4 Stars",status:"In stock"},
+ {name:"Sapiens: A Brief History of Humankind",price:54.23,rating:"5 Stars",status:"In stock"},
+ {name:"The Requiem Red",price:22.65,rating:"1 Star",status:"In stock"},
+ {name:"The Black Maria",price:52.15,rating:"1 Star",status:"In stock"},
+ {name:"Starving Hearts",price:13.99,rating:"2 Stars",status:"In stock"}
+];
+
+function render(data){
+ const tbody=document.getElementById("bookTable");
+ tbody.innerHTML=data.map(b=>`
+ <tr><td>${b.name}</td><td>£${b.price.toFixed(2)}</td>
+ <td class="rating">${b.rating}</td><td><span class="status">${b.status}</span></td></tr>`).join("");
+ document.getElementById("total").textContent=data.length;
+ document.getElementById("available").textContent=data.filter(b=>b.status==="In stock").length;
+ const avg=data.length?data.reduce((s,b)=>s+b.price,0)/data.length:0;
+ document.getElementById("avg").textContent="£"+avg.toFixed(2);
+}
+function filterBooks(){
+ const q=document.getElementById("search").value.toLowerCase();
+ render(books.filter(b=>b.name.toLowerCase().includes(q)));
+}
+function downloadCSV(){
+ let csv="Book Name,Price,Rating,Status\n";
+ books.forEach(b=>csv+=`"${b.name}",${b.price},"${b.rating}","${b.status}"\n`);
+ const blob=new Blob([csv],{type:"text/csv"});
+ const a=document.createElement("a");
+ a.href=URL.createObjectURL(blob); a.download="books_data.csv"; a.click();
+ URL.revokeObjectURL(a.href);
+}
+document.getElementById("search").addEventListener("input",filterBooks);
+render(books);
+</script>
+</body>
+</html>
